@@ -1,0 +1,31 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+	overflow:hidden;
+}
+#top {
+    width: 800px;
+    height: 800px;
+    position: relative;
+    margin: 0 auto;
+    margin-top: 25px;
+}
+#restart {
+    width: 200px;
+    height: 50px;
+    background-color: rgb(25, 216, 216);
+    font-size: 25px;
+    border: none;
+    border-radius: 25px;
+    color: rgb(241, 243, 245);
+    text-shadow: 1.5px 1.5px 1.5px rgb(226, 223, 223);
+}
+#map {
+    width: 800px;
+    height: 600px;
+    background-color: rgb(202, 201, 199);
+    position: relative;
+    margin: 0 auto;
+}
