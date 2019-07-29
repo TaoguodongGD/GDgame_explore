@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>像素鸟</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #view {
+            width: 800px;
+            height: 660px;
+            margin: 0 auto;
+            margin-top: 30px;
+        }
+
+        #game {
+            width: 800px;
+            height: 600px;
+            background-image: url(images/sky.png);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        #bird {
+            width: 34px;
+            height: 25px;
+            background-image: url(images/birds.png);
+            background-position: -10px -8px;
+            position: absolute;
+            top: 100px;
+            left: 100px;
+        }
+
+        #restart {
+            width: 200px;
+            height: 50px;
+            background-color: rgb(25, 216, 216);
+            font-size: 25px;
+            border: none;
+            border-radius: 25px;
+            color: rgb(241, 243, 245);
+            text-shadow: 1.5px 1.5px 1.5px rgb(226, 223, 223);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <input type="button" id="restart" onclick="again()" value="PLAY"> -->
+    <div id="view">
+        <button id="restart" onclick="again()">PLAY</button>
+        <div id="game">
+            <div id="bird">
+
+            </div>
+        </div>
+        <h4>请点击鼠标左键控制小鸟~</h4>
+    </div>
+    <script>
+        // 让小鸟飞起来
+        // 怎么飞？
+        // 水平上：移动背景
+        // 垂直上：改变bird的top值
+        // 需要的知识点：
+        // 定时器
+        // 动画原理 Leader = Leader + step
+
+        //获取相应元素
+        var game = document.getElementById('game');
+        var birdEle = document.getElementById('bird');
+
+        //初始化背景图的值
+        var sky = {
+            x: 0
+        }
+        //初始bird的值
+        var bird = {
+            //xy方向的速度
+            speedX: 5,
+            speedY: 0,
+            //获取小鸟的位置
+            x: birdEle.offsetLeft,
+            y: birdEle.offsetTop
+        }
+        //游戏的状态
+        var running = true;
+        //定时器
+        setInterval(function () {
+            //判断游戏开始
+            if (running) {
+                //移动背景 让小鸟实现水平移动
+                sky.x -= 5;
+                game.style.backgroundPositionX = sky.x + 'px';
+
+                //实现小鸟的上下移动 垂直移动
+                //小鸟自由落体 即无操作的时候，小鸟下落
+                bird.speedY += 1;//★★★★★★★★★核心就在这里，先把speedY改为0★★★★★★★
+                bird.y += bird.speedY;
+
+                //游戏结束条件1：碰边界 结束后小鸟停止运动
+                if (bird.y < 0) {
+                    running = false;
+                    bird.y = 0;
+                    if (running == false) {
+                        document.getElementById("restart").innerHTML = "RESTART";
+                        window.alert("Game Over!");
+                    }
+                }
+                if (bird.y + birdEle.offsetHeight > 600) {
+                    running = false;
+                    bird.y = 600 - birdEle.offsetHeight;//该语句控制小鸟最后只能定在下边位置
+                    if (running == false) {
+                        document.getElementById("restart").innerHTML = "RESTART";
+                    }
+                }
+
+                //为什么游戏结束条件要放到这个语句下面呢？因为，下面的语句才是真正的画面渲染语句
+                birdEle.style.top = bird.y + 'px';//注意：小鸟下落 是通过top属性设置的
+            }
+        }, 30);
+        //点击文档实现小鸟向上移动
+        document.onclick = function () {
+            bird.speedY = -12;//☆☆☆☆☆☆☆☆☆
+        }
+
+        //创建管道
+        function createPite(position) {
+            var pipe = {};
+            pipe.x = position;
+            //随机产生管道
+            //规定：上管道的高度在200-300之间
+            // pipe.uHeight = 200 + parseInt(Math.random() * 100);
+            //100-250之间
+            pipe.uHeight = 150 + parseInt(Math.random() * 200);
+            pipe.dHeight = 600 - pipe.uHeight - 150;
+            pipe.dTop = pipe.uHeight + 150;
+
+            //上管道
+            var uPipe = document.createElement('div');
+            uPipe.style.width = '52px';
+            uPipe.style.height = pipe.uHeight + 'px';
+            uPipe.style.background = 'url(./images/pipe2.png) no-repeat center bottom';
+            uPipe.style.position = 'absolute';
+            uPipe.style.top = 0;
+            uPipe.style.left = pipe.x + 'px';
+            game.appendChild(uPipe);
+            //下管道
+            var dPipe = document.createElement('div');
+            dPipe.style.width = '52px';
+            dPipe.style.height = pipe.dHeight + 'px';
+            dPipe.style.background = 'url(./images/pipe1.png) no-repeat center top';
+            dPipe.style.position = 'absolute';
+            dPipe.style.top = pipe.dTop + 'px';
+            dPipe.style.left = pipe.x + 'px';
+            game.appendChild(dPipe);
+
+            //让管道运动起来
+            setInterval(function () {
+                if (running == true) {
+                    pipe.x -= 4;
+                    uPipe.style.left = pipe.x + 'px';
+                    dPipe.style.left = pipe.x + 'px';
+                    //使管道一直产生
+                    if (pipe.x < -52) {
+                        pipe.x = 800;
+                    }
+                    //游戏结束条件2：碰管道
+                    var uCheck = bird.x + 34 > pipe.x && bird.x < pipe.x + 52 && bird.y < pipe.uHeight;
+                    var dCheck = bird.x + 34 > pipe.x && bird.x < pipe.x + 52 && bird.y + birdEle.offsetHeight > pipe.uHeight + 150;//pipe.uHeight + 200理解为什么要这样写
+                    if (uCheck || dCheck) {
+                        running = false;
+                        if (running == false) {
+                            document.getElementById("restart").innerHTML = "RESTART";
+                        }
+                    }
+                }
+            }, 30);
+        }
+        createPite(400);//第一个管道的位置为400
+        createPite(600);
+        createPite(800);
+        createPite(1000);
+
+        function again() {
+            window.location.reload(true);
+        }
+    </script>
+</body>
+
+</html>
